@@ -1,18 +1,15 @@
-
-from scipy import rand
-from sympy import C
 from settings import*
 import numpy as np
 from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
 import random
 
-import mayavi.mlab as ma
+# import mayavi.mlab as ma
 
 class Carte():
     def __init__(self):
         #taille 9x16
-        # 0,1,2,3 pour les hauteurs
+        # 0,1,2,3 pour les hauteurs()
         self.mapdef = ['3100011122211100',
                        '3100011000000023',
                        '3000001111000022',
@@ -34,7 +31,8 @@ class Carte():
         height,width= self.map.shape
         for i in range(height):
             for j in range(width):
-                alti = self.minimap[i//10][j//10]  # à revoir avec des cstes
+                minih,miniw=len(self.minimap),len(self.minimap[0])
+                alti = self.minimap[i//(TILE_SIZE *  HEIGHT // minih)][j//(TILE_SIZE * WIDTH // miniw)]  # à revoir avec des cstes
                 self.map[i, j] = HAUTEURS[alti]
 
     def add_noise(self,noise_amp, noise_size : int):
@@ -70,11 +68,11 @@ class Carte():
         ma.show()
 
 
-
+print('execution')
 carte=Carte()
-carte.add_noise(250,5)
-carte.smoothen(10)
-carte.plot3D()
+carte.add_noise(250,50)
+carte.smoothen(100)
+# carte.plot3D()
 plt.figure()
 plt.imshow(carte.map)
 plt.show()

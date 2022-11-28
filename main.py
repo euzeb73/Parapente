@@ -1,6 +1,6 @@
 from settings import *
-
-
+from carte import Carte
+import sys
 
 class App:
     def __init__(self):
@@ -10,7 +10,7 @@ class App:
         # self.delta_time = 0.01
        
         # game objects
-        self.terrain=Terrain()
+        self.map=Carte()
 
     def update(self):
         self.scene.update()
@@ -19,7 +19,7 @@ class App:
         self.delta_time = self.clock.tick()
 
     def draw(self):
-        self.screen.fill(BG_COLOR)
+        # self.screen.fill(BG_COLOR)
         self.main_group.draw(self.screen)
         pg.display.flip()
 
