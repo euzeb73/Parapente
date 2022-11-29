@@ -8,7 +8,7 @@ TILE_SIZE = 1
 #Hauteurs correspondantes à 0,1,2,3 sur minimap
 HAUTEURS=[100,500,1000,2000]
 #Echelle horizontale en mpp (meter per pixel)
-SCALE=100
+SCALE=10
 
 
 
