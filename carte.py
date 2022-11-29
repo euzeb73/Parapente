@@ -4,7 +4,23 @@ from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
 import random
 
+
 import mayavi.mlab as ma
+
+def gauss2D(N):
+    """
+    2D gaussian mask
+    """
+    shape=(N,N)
+    sigma=N/4
+    m,n = [(ss-1.)/2. for ss in shape]
+    y,x = np.ogrid[-m:m+1,-n:n+1]
+    h = np.exp( -(x*x + y*y) / (2.*sigma*sigma) )
+    h[ h < np.finfo(h.dtype).eps*h.max() ] = 0
+    sumh = h.sum()
+    if sumh != 0:
+        h /= sumh
+    return h
 
 class Carte():
     def __init__(self):
@@ -19,15 +35,21 @@ class Carte():
                        '3332222000110002',
                        '3333321111000003',
                        '3333333222220000']
+        print('Lecture minimap')
         self.make_minimap()
+        print('Fabrication de la grande carte')
         self.make_map()
+        print('Ajout du bruit')
+        self.add_noise(250,100)
+        print('Lissage')
+        self.smoothen(200)
 
     def make_minimap(self):
         self.minimap = [[int(num) for num in line]
                              for line in self.mapdef]
 
     def make_map(self):
-        self.map = np.empty((HEIGHT//TILE_SIZE, WIDTH//TILE_SIZE))
+        self.map : np.ndarray = np.empty((HEIGHT//TILE_SIZE, WIDTH//TILE_SIZE))
         height,width= self.map.shape
         for i in range(height):
             for j in range(width):
@@ -51,8 +73,16 @@ class Carte():
         '''
         un filtre moyenneur de taille NxN
         '''
-        filtre=np.ones((N,N))
-        self.map = convolve2d(self.map,filtre,mode= 'same')/N**2
+        filtre=np.ones((N,N)) #Moyenne
+        filtre=np.array(
+            [[1,1,5,1,1],
+             [1,5,9,5,1],
+             [5,5,20,5,5],
+             [1,5,9,5,1],
+             [1,1,5,1,1]]) #un peu au pif mais trop petit
+        filtre=filtre/np.sum(filtre)
+        filtre=gauss2D(N)
+        self.map : np.ndarray = convolve2d(self.map,filtre,mode= 'same')
 
     def plot3D(self):
         height,width= self.map.shape
@@ -67,13 +97,8 @@ class Carte():
         ma.surf(X, Y, tabalti, colormap='gist_earth')
         ma.show()
 
-
-print('execution')
-carte=Carte()
-carte.add_noise(250,50)
-carte.smoothen(100)
-carte.plot3D()
-plt.figure()
-plt.imshow(carte.map)
-plt.show()
+# carte.plot3D()
+# plt.figure()
+# plt.imshow(carte.map)
+# plt.show()
 
