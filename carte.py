@@ -3,7 +3,7 @@ import numpy as np
 from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
 import random
-
+import math
 
 import mayavi.mlab as ma
 
@@ -39,35 +39,51 @@ class Carte():
         self.make_minimap()
         print('Fabrication de la grande carte')
         self.make_map()
+        #Pour du debug
+        self.primmap=self.map.copy()
         print('Ajout du bruit')
-        self.add_noise(250,100)
+        #en full c'est 250,100
+        self.add_noise(250,TILE_SIZE)
         print('Lissage')
-        self.smoothen(200)
+        self.smoothen(2*TILE_SIZE)
+        # en full c'est 200
+        self.create_colormap()
 
     def make_minimap(self):
         self.minimap = [[int(num) for num in line]
                              for line in self.mapdef]
 
     def make_map(self):
-        self.map : np.ndarray = np.empty((HEIGHT//TILE_SIZE, WIDTH//TILE_SIZE))
+        self.map : np.ndarray = np.empty((9*TILE_SIZE, 10*TILE_SIZE))
         height,width= self.map.shape
         for i in range(height):
             for j in range(width):
-                minih,miniw=len(self.minimap),len(self.minimap[0])
-                alti = self.minimap[i//(TILE_SIZE *  HEIGHT // minih)][j//(TILE_SIZE * WIDTH // miniw)]  # à revoir avec des cstes
+                # minih,miniw=len(self.minimap),len(self.minimap[0])
+                alti = self.minimap[i//(TILE_SIZE)][j//(TILE_SIZE)] 
                 self.map[i, j] = HAUTEURS[alti]
 
     def add_noise(self,noise_amp, noise_size : int):
         '''
-        du bruit: d'amplitude noise_amp
-        de taille caractéristique noise_size
+        du bruit: d'amplitude noise_amp en m
+        de taille verticale noise_size en pixel 
+        (taille horizontale=WIDTH/HEIGHT*taille vert)
         '''
+
+        'mettre des rectangel '
         height,width= self.map.shape
         for i in range(0,height,noise_size):
             for j in range(0,width,noise_size):
                 altshift=random.normalvariate(0,noise_amp)
-                tab_altshift=altshift*np.ones((noise_size,noise_size))
-                self.map[i:i+noise_size,j:j+noise_size]=self.map[i:i+noise_size,j:j+noise_size]+tab_altshift
+                if j+WIDTH*noise_size//HEIGHT < width:
+                    noisewidth=WIDTH*noise_size//HEIGHT
+                else:
+                    noisewidth=WIDTH*noise_size//HEIGHT-(j+WIDTH*noise_size//HEIGHT) % width
+                if i+noise_size < height:
+                    noiseheight=noise_size
+                else:
+                    noiseheight=noise_size-(i+noise_size) % height
+                tab_altshift=altshift*np.ones((noiseheight,noisewidth))
+                self.map[i:i+noise_size,j:j+WIDTH*noise_size//HEIGHT]=self.map[i:i+noise_size,j:j+WIDTH*noise_size//HEIGHT]+tab_altshift
 
     def smoothen(self,N):
         '''
@@ -82,7 +98,29 @@ class Carte():
              [1,1,5,1,1]]) #un peu au pif mais trop petit
         filtre=filtre/np.sum(filtre)
         filtre=gauss2D(N)
-        self.map : np.ndarray = convolve2d(self.map,filtre,mode= 'same')
+        self.map : np.ndarray = convolve2d(self.map,filtre,mode= 'same',boundary='symm')
+
+    def create_colormap(self):
+        '''
+        Version à la main
+
+        maxi=np.max(self.map)
+        mini=np.min(self.map)
+        height,width= self.map.shape
+        self.colormap=np.zeros((height,width,3))
+        for i in range(height):
+            for j in range(width):
+                hauteur=self.map[i,j]
+                x=(hauteur-mini)/(maxi-mini) #x varie de 0 à 1
+                red=math.floor(200*x**6)
+                green=math.floor(200*(1-math.exp(-x/0.2)))
+                blue=math.floor(4*(x-0.5)**2 *200)
+                pixel=np.array([red,green,blue])
+                self.colormap[i,j]=pixel
+        self.colormap=np.swapaxes(self.colormap,0,1)
+        '''
+        self.colormapfile='temp.png'
+        plt.imsave(self.colormapfile,self.map,cmap='terrain')
 
     def plot3D(self):
         height,width= self.map.shape
@@ -97,8 +135,15 @@ class Carte():
         ma.surf(X, Y, tabalti, colormap='gist_earth')
         ma.show()
 
-# carte.plot3D()
-# plt.figure()
-# plt.imshow(carte.map)
-# plt.show()
+
+if __name__ == '__main__':
+    carte=Carte()
+    # carte.plot3D()
+    plt.figure()
+    plt.imshow(carte.map,cmap='terrain')
+    height,width= carte.map.shape
+    X=np.arange(width)
+    Y=np.arange(height)
+    plt.contour(X,Y,carte.map)
+    plt.show()
 

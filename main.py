@@ -3,12 +3,15 @@ from carte import Carte
 import sys
 import time
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 class App:
     def __init__(self):
         #Création de la carte
         t1=time.time()
-        self.map=Carte().map
+        # self.map=Carte().map
+        self.carte : Carte=Carte()
         t2=time.time()
         print(f'chargement Carte en {t2-t1:.0f} s')
         
@@ -19,9 +22,12 @@ class App:
         self.delta_time = 0.01
        
         # game objects
-        print('Convertion de la carte')
+        print('Conversion de la carte')
         t1=time.time()
-        self.bg=pg.surfarray.make_surface(np.floor(self.map.transpose()))
+        # self.bg=pg.surfarray.make_surface(self.carte.colormap)
+        self.bg=pg.image.load(self.carte.colormapfile)
+        self.bg=pg.transform.scale(self.bg,(WIDTH,HEIGHT))
+        
         t2=time.time()
         print(f'conversion Carte en {t2-t1:.0f} s')
 
@@ -48,10 +54,14 @@ class App:
 
     def run(self):
         self.draw()
+        # plt.figure()
+        # plt.imshow(self.carte.map,cmap='terrain')
+        # plt.show()
         while True:
             self.check_events()
             self.get_time()
             self.update()
+            self.clock.tick(120)
             
 
 
