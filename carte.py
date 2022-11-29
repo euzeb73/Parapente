@@ -4,7 +4,7 @@ from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
 import random
 
-# import mayavi.mlab as ma
+import mayavi.mlab as ma
 
 class Carte():
     def __init__(self):
@@ -72,7 +72,7 @@ print('execution')
 carte=Carte()
 carte.add_noise(250,50)
 carte.smoothen(100)
-# carte.plot3D()
+carte.plot3D()
 plt.figure()
 plt.imshow(carte.map)
 plt.show()
