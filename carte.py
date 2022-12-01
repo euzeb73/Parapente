@@ -35,6 +35,18 @@ class Carte():
                        '3332222000110002',
                        '3333321111000003',
                        '3333333222220000']
+        #taille 9x12
+        # 0,1,2,3 pour les hauteurs()
+        self.mapdef = ['310011221100',
+                       '310010000023',
+                       '300011100022',
+                       '331000112103',
+                       '332001222002',
+                       '332200122001',
+                       '332220011002',
+                       '333321100003',
+                       '333332220000']
+        '''
         print('Lecture minimap')
         self.make_minimap()
         print('Fabrication de la grande carte')
@@ -48,6 +60,8 @@ class Carte():
         self.smoothen(2*TILE_SIZE)
         # en full c'est 200
         self.create_colormap()
+        '''
+        self.colormapfile='temp.png'
 
     def make_minimap(self):
         self.minimap = [[int(num) for num in line]
@@ -74,16 +88,16 @@ class Carte():
         for i in range(0,height,noise_size):
             for j in range(0,width,noise_size):
                 altshift=random.normalvariate(0,noise_amp)
-                if j+WIDTH*noise_size//HEIGHT < width:
-                    noisewidth=WIDTH*noise_size//HEIGHT
+                if j+MWIDTH*noise_size//MHEIGHT < width:
+                    noisewidth=MWIDTH*noise_size//MHEIGHT
                 else:
-                    noisewidth=WIDTH*noise_size//HEIGHT-(j+WIDTH*noise_size//HEIGHT) % width
+                    noisewidth=MWIDTH*noise_size//MHEIGHT-(j+MWIDTH*noise_size//MHEIGHT) % width
                 if i+noise_size < height:
                     noiseheight=noise_size
                 else:
                     noiseheight=noise_size-(i+noise_size) % height
                 tab_altshift=altshift*np.ones((noiseheight,noisewidth))
-                self.map[i:i+noise_size,j:j+WIDTH*noise_size//HEIGHT]=self.map[i:i+noise_size,j:j+WIDTH*noise_size//HEIGHT]+tab_altshift
+                self.map[i:i+noise_size,j:j+MWIDTH*noise_size//MHEIGHT]=self.map[i:i+noise_size,j:j+MWIDTH*noise_size//MHEIGHT]+tab_altshift
 
     def smoothen(self,N):
         '''
@@ -119,7 +133,7 @@ class Carte():
                 self.colormap[i,j]=pixel
         self.colormap=np.swapaxes(self.colormap,0,1)
         '''
-        self.colormapfile='temp.png'
+        
         plt.imsave(self.colormapfile,self.map,cmap='terrain')
 
     def plot3D(self):

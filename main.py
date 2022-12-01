@@ -1,5 +1,8 @@
 from settings import *
 from carte import Carte
+from hubup import HubUp
+from hubdown import HubDown
+from parapente import Parapente
 import sys
 import time
 import numpy as np
@@ -24,10 +27,20 @@ class App:
         # game objects
         print('Conversion de la carte')
         t1=time.time()
-        # self.bg=pg.surfarray.make_surface(self.carte.colormap)
+
         self.bg=pg.image.load(self.carte.colormapfile)
-        self.bg=pg.transform.scale(self.bg,(WIDTH,HEIGHT))
-        
+        self.bg=pg.transform.scale(self.bg,(MWIDTH,MHEIGHT))
+        #HUBs
+        self.hubup=HubUp(self.screen)
+        self.hubdown=HubDown(self.screen)
+
+        #PArapente
+        self.parapente=Parapente(self.screen)
+
+        #sprites
+        self.spritegroup=pg.sprite.Group()
+        self.parapente.add(self.spritegroup)
+
         t2=time.time()
         print(f'conversion Carte en {t2-t1:.0f} s')
 
@@ -38,22 +51,32 @@ class App:
         self.delta_time = self.clock.tick()
 
     def draw(self):
+        #Background
         self.screen.blit(self.bg,(0,0))
+        #Hubs
+        self.hubup.draw()
+        self.hubdown.draw()
+
+        #Sprites
+        self.spritegroup.draw(self.screen)
+
+        # pg.draw.rect(self.screen,(255,0,0),self.parapente.rect)
         # self.main_group.draw(self.screen)
         pg.display.flip()
 
     def check_events(self):
-        self.anim_trigger = False
         for e in pg.event.get():
             if e.type == pg.QUIT or (e.type == pg.KEYDOWN and e.key == pg.K_ESCAPE):
                 pg.quit()
                 sys.exit()
+            elif e.type == pg.KEYDOWN:
+                if e.key == pg.K_r:
+                    self.parapente.rotate(-10)
 
     def get_time(self):
         self.time = pg.time.get_ticks() * 0.001
 
     def run(self):
-        self.draw()
         # plt.figure()
         # plt.imshow(self.carte.map,cmap='terrain')
         # plt.show()
@@ -61,7 +84,8 @@ class App:
             self.check_events()
             self.get_time()
             self.update()
-            self.clock.tick(120)
+            self.draw()
+            self.clock.tick(200)
             
 
 
