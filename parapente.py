@@ -23,7 +23,7 @@ class Parapente(pg.sprite.Sprite):
         super().__init__()
         self.screen = screen
 
-        #Caractéristiques physique
+        #Caractéristiques physiques
         self.vmin = 6  # en m s^-1 vitesse décrochage
         self.vmax = 11  # en m s^-1 vitesse bras hauts
         # en m s^-2 "accélération" pour changement de vitesse quand changement de freinage
@@ -52,7 +52,7 @@ class Parapente(pg.sprite.Sprite):
         self.height = self.image.get_height()
 
         #Rectangle du sprite
-        self.rect = self.image.get_rect(center=(self.x/SCALE, self.y/SCALE))
+        self.rect = self.image.get_rect(center=(self.x, self.y))
         self.rotate(-120)
 
     def rotate(self, angle):
@@ -154,4 +154,6 @@ class Joueur(Parapente):
         self.rotate(self.w*DT)
         #vz
         #DAns un premier temps sans inertie
-        self.vz = vzmains
+        #maisn En tenant compte du virage
+        vzvirage=-12*(self.w/self.wmax)**2 #-12 ms^-1 en virage au taquet
+        self.vz = vzmains+vzvirage

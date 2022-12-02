@@ -42,7 +42,7 @@ class App:
         print('Conversion de la carte')
         t1 = time.time()
         self.bg = pg.image.load(self.carte.colormapfile)
-        self.bg = pg.transform.scale(self.bg, (MWIDTH, MHEIGHT))
+        self.bg = pg.transform.smoothscale(self.bg, (MWIDTH, MHEIGHT))
         t2 = time.time()
         print(f'conversion Carte en {t2-t1:.0f} s')
 
@@ -50,7 +50,7 @@ class App:
         self.parapente = Joueur(self.screen)
 
         #HUBs
-        self.hubup = HubUp(self.screen, self.parapente)
+        self.hubup = HubUp(self.screen, self.parapente, self.carte)
         self.hubdown = HubDown(self.screen, self.parapente)
 
         #sprites
@@ -68,24 +68,38 @@ class App:
         # self.main_group.update()
         pg.display.set_caption(f'{self.clock.get_fps(): .1f}')
         self.delta_time = self.clock.tick()
+
+        self.hubup.update()
+
         self.spritegroup.update()
 
     def draw(self):
         #Background
         self.screen.blit(self.bg, (0, 0))
+
+        #Infos
+        self.fontsmall.addtext(f'vz {self.parapente.vz}','vz')
+        self.fontsmall.addtext(f'z {self.parapente.z}','z')
+        
+        self.screen.blit(self.fontsmall.textdic['vz'], (100,100))
+        self.screen.blit(self.fontsmall.textdic['z'], (100,130))
+
+        self.fontsmall.addtext(f'debut {self.hubup.debut.x,self.hubup.debut.y}','deb')
+        self.fontsmall.addtext(f'fin {self.hubup.fin.x,self.hubup.fin.y}','fin')
+        
+        self.screen.blit(self.fontsmall.textdic['deb'], (100,160))
+        self.screen.blit(self.fontsmall.textdic['fin'], (100,190))
+
         #Hubs
-        self.hubup.draw()
         self.hubdown.draw()
+        self.hubup.draw()
+        
 
         #Sprites
         self.spritegroup.draw(self.screen)
 
-        #Infos
-        self.fontsmall.addtext(f'vz {self.parapente.vz}','vz')
-        self.fontsmall.addtext(f'maind {self.parapente.frein_droit.longueur}','md')
         
-        self.screen.blit(self.fontsmall.textdic['vz'], (100,100))
-        self.screen.blit(self.fontsmall.textdic['md'], (100,130))
+
         # pg.draw.rect(self.screen,(255,0,0),self.parapente.rect)
         # self.main_group.draw(self.screen)
         pg.display.flip()

@@ -3,24 +3,25 @@ import numpy as np
 from scipy.signal import convolve2d
 import matplotlib.pyplot as plt
 import random
-import math
 
 import mayavi.mlab as ma
+
 
 def gauss2D(N):
     """
     2D gaussian mask
     """
-    shape=(N,N)
-    sigma=N/4
-    m,n = [(ss-1.)/2. for ss in shape]
-    y,x = np.ogrid[-m:m+1,-n:n+1]
-    h = np.exp( -(x*x + y*y) / (2.*sigma*sigma) )
-    h[ h < np.finfo(h.dtype).eps*h.max() ] = 0
+    shape = (N, N)
+    sigma = N/4
+    m, n = [(ss-1.)/2. for ss in shape]
+    y, x = np.ogrid[-m:m+1, -n:n+1]
+    h = np.exp(-(x*x + y*y) / (2.*sigma*sigma))
+    h[h < np.finfo(h.dtype).eps*h.max()] = 0
     sumh = h.sum()
     if sumh != 0:
         h /= sumh
     return h
+
 
 class Carte():
     def __init__(self):
@@ -46,7 +47,9 @@ class Carte():
                        '332220011002',
                        '333321100003',
                        '333332220000']
-        '''
+
+        self.colormapfile = 'temp.png'
+
         print('Lecture minimap')
         self.make_minimap()
         print('Fabrication de la grande carte')
@@ -59,24 +62,33 @@ class Carte():
         print('Lissage')
         self.smoothen(2*TILE_SIZE)
         # en full c'est 200
+        
+        #On élimine les 0:
+        self.map [ self.map < 0] = 0
+
         self.create_colormap()
-        '''
-        self.colormapfile='temp.png'
+
+        #TODO: Clarifier
+        #TILE_SIZE c'est la taille d'une tuile de minimap, pas trop utile en fait en dehors de carte
+        #self.scale est l'échelle de self.map autrement dit entre i et i+1 il y a une distance scale en m
+        #Ca doit avoir un rapport avec SCALE mais à clarifier
+        self.scale = 2 # en m
+        
 
     def make_minimap(self):
         self.minimap = [[int(num) for num in line]
-                             for line in self.mapdef]
+                        for line in self.mapdef]
 
     def make_map(self):
-        self.map : np.ndarray = np.empty((9*TILE_SIZE, 10*TILE_SIZE))
-        height,width= self.map.shape
+        self.map: np.ndarray = np.empty((9*TILE_SIZE, 12*TILE_SIZE))
+        height, width = self.map.shape
         for i in range(height):
             for j in range(width):
                 # minih,miniw=len(self.minimap),len(self.minimap[0])
-                alti = self.minimap[i//(TILE_SIZE)][j//(TILE_SIZE)] 
+                alti = self.minimap[i//(TILE_SIZE)][j//(TILE_SIZE)]
                 self.map[i, j] = HAUTEURS[alti]
 
-    def add_noise(self,noise_amp, noise_size : int):
+    def add_noise(self, noise_amp, noise_size: int):
         '''
         du bruit: d'amplitude noise_amp en m
         de taille verticale noise_size en pixel 
@@ -84,35 +96,38 @@ class Carte():
         '''
 
         'mettre des rectangel '
-        height,width= self.map.shape
-        for i in range(0,height,noise_size):
-            for j in range(0,width,noise_size):
-                altshift=random.normalvariate(0,noise_amp)
+        height, width = self.map.shape
+        for i in range(0, height, noise_size):
+            for j in range(0, width, noise_size):
+                altshift = random.normalvariate(0, noise_amp)
                 if j+MWIDTH*noise_size//MHEIGHT < width:
-                    noisewidth=MWIDTH*noise_size//MHEIGHT
+                    noisewidth = MWIDTH*noise_size//MHEIGHT
                 else:
-                    noisewidth=MWIDTH*noise_size//MHEIGHT-(j+MWIDTH*noise_size//MHEIGHT) % width
+                    noisewidth = MWIDTH*noise_size//MHEIGHT - \
+                        (j+MWIDTH*noise_size//MHEIGHT) % width
                 if i+noise_size < height:
-                    noiseheight=noise_size
+                    noiseheight = noise_size
                 else:
-                    noiseheight=noise_size-(i+noise_size) % height
-                tab_altshift=altshift*np.ones((noiseheight,noisewidth))
-                self.map[i:i+noise_size,j:j+MWIDTH*noise_size//MHEIGHT]=self.map[i:i+noise_size,j:j+MWIDTH*noise_size//MHEIGHT]+tab_altshift
+                    noiseheight = noise_size-(i+noise_size) % height
+                tab_altshift = altshift*np.ones((noiseheight, noisewidth))
+                self.map[i:i+noise_size, j:j+MWIDTH*noise_size//MHEIGHT] = self.map[i:i +
+                                                                                    noise_size, j:j+MWIDTH*noise_size//MHEIGHT]+tab_altshift
 
-    def smoothen(self,N):
+    def smoothen(self, N):
         '''
         un filtre moyenneur de taille NxN
         '''
-        filtre=np.ones((N,N)) #Moyenne
-        filtre=np.array(
-            [[1,1,5,1,1],
-             [1,5,9,5,1],
-             [5,5,20,5,5],
-             [1,5,9,5,1],
-             [1,1,5,1,1]]) #un peu au pif mais trop petit
-        filtre=filtre/np.sum(filtre)
-        filtre=gauss2D(N)
-        self.map : np.ndarray = convolve2d(self.map,filtre,mode= 'same',boundary='symm')
+        filtre = np.ones((N, N))  # Moyenne
+        filtre = np.array(
+            [[1, 1, 5, 1, 1],
+             [1, 5, 9, 5, 1],
+             [5, 5, 20, 5, 5],
+             [1, 5, 9, 5, 1],
+             [1, 1, 5, 1, 1]])  # un peu au pif mais trop petit
+        filtre = filtre/np.sum(filtre)
+        filtre = gauss2D(N)
+        self.map: np.ndarray = convolve2d(
+            self.map, filtre, mode='same', boundary='symm')
 
     def create_colormap(self):
         '''
@@ -133,11 +148,24 @@ class Carte():
                 self.colormap[i,j]=pixel
         self.colormap=np.swapaxes(self.colormap,0,1)
         '''
-        
-        plt.imsave(self.colormapfile,self.map,cmap='terrain')
+
+        plt.imsave(self.colormapfile, self.map, cmap='terrain')
+
+    def read_alt(self, x, y):
+        """
+        Renvoie l'altitude du point x,y si x,y n'est pas dans la map renvoie 4000 m
+        """
+        N, M = self.map.shape
+        #il y aura du SCALE là de dans plus tard.
+        j,i=int(round(x/self.scale)),int(round(y/self.scale))
+        notinmap = j < 0 or j > M-1 or i < 0 or i > N-1
+        if notinmap:
+            return 4000
+        else:
+            return self.map[i,j]
 
     def plot3D(self):
-        height,width= self.map.shape
+        height, width = self.map.shape
         X = SCALE*np.arange(width)
         Y = SCALE*np.arange(height)
         X, Y = np.meshgrid(X, Y)
@@ -151,13 +179,12 @@ class Carte():
 
 
 if __name__ == '__main__':
-    carte=Carte()
+    carte = Carte()
     # carte.plot3D()
     plt.figure()
-    plt.imshow(carte.map,cmap='terrain')
-    height,width= carte.map.shape
-    X=np.arange(width)
-    Y=np.arange(height)
-    plt.contour(X,Y,carte.map)
+    plt.imshow(carte.map, cmap='terrain')
+    height, width = carte.map.shape
+    X = np.arange(width)
+    Y = np.arange(height)
+    plt.contour(X, Y, carte.map)
     plt.show()
-

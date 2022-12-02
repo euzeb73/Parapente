@@ -22,7 +22,7 @@ TILE_SIZE = 50 #1,2,4,5,10,20,25,50,100 sont les seules valeurs possibles
 #Hauteurs correspondantes à 0,1,2,3 sur minimap
 HAUTEURS=[100,500,1000,2000]
 #Echelle horizontale en mpp (meter per pixel)
-SCALE=0.5
+SCALE=0.5 #PAS ENCORE UTILISE TODO
 
 #Vitesse du jeu
 VITESSE_MULT=5
