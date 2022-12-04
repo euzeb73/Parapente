@@ -8,6 +8,7 @@ import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from thermique import Thermique
 
 
 class Font():
@@ -25,12 +26,6 @@ class Font():
 
 class App:
     def __init__(self):
-        #Création de la carte
-        t1 = time.time()
-        # self.map=Carte().map
-        self.carte: Carte = Carte()
-        t2 = time.time()
-        print(f'chargement Carte en {t2-t1:.0f} s')
 
         pg.init()
         self.screen = pg.display.set_mode(RES)
@@ -38,16 +33,18 @@ class App:
         self.time = 0
         self.delta_time = 0.01
 
-        # game objects
-        print('Conversion de la carte')
+        #Création de la carte
         t1 = time.time()
-        self.bg = pg.image.load(self.carte.colormapfile)
-        self.bg = pg.transform.smoothscale(self.bg, (MWIDTH, MHEIGHT))
+        # self.map=Carte().map
+        self.carte: Carte = Carte(self.screen)
         t2 = time.time()
-        print(f'conversion Carte en {t2-t1:.0f} s')
+        print(f'chargement Carte en {t2-t1:.0f} s')
 
         #PArapente
-        self.parapente = Joueur(self.screen)
+        self.parapente = Joueur(self.screen, self.carte)
+
+        #thermiques
+        self.generate_thermals()
 
         #HUBs
         self.hubup = HubUp(self.screen, self.parapente, self.carte)
@@ -63,11 +60,20 @@ class App:
         #Mouvement des freins
         self.freind, self.freing = 0, 0
 
+    def generate_thermals(self):
+        """a compléter"""
+        thermique=Thermique(self.screen, self.carte)
+        thermique.set_param(150,5,3500)
+        thermique.move_to(250,250)
+        self.carte.add_thermique([thermique])
+
     def update(self):
         # self.scene.update()
         # self.main_group.update()
         pg.display.set_caption(f'{self.clock.get_fps(): .1f}')
         self.delta_time = self.clock.tick()
+
+        self.carte.update()
 
         self.hubup.update()
 
@@ -75,7 +81,7 @@ class App:
 
     def draw(self):
         #Background
-        self.screen.blit(self.bg, (0, 0))
+        self.carte.draw() #background
 
         #Infos
         self.fontsmall.addtext(f'vz {self.parapente.vz}','vz')
@@ -84,16 +90,12 @@ class App:
         self.screen.blit(self.fontsmall.textdic['vz'], (100,100))
         self.screen.blit(self.fontsmall.textdic['z'], (100,130))
 
-        self.fontsmall.addtext(f'debut {self.hubup.debut.x,self.hubup.debut.y}','deb')
-        self.fontsmall.addtext(f'fin {self.hubup.fin.x,self.hubup.fin.y}','fin')
-        
-        self.screen.blit(self.fontsmall.textdic['deb'], (100,160))
-        self.screen.blit(self.fontsmall.textdic['fin'], (100,190))
-
         #Hubs
         self.hubdown.draw()
         self.hubup.draw()
         
+        #Thermiques
+
 
         #Sprites
         self.spritegroup.draw(self.screen)

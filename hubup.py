@@ -36,14 +36,16 @@ class HubUp():
         return altitudes
 
     def prep_lines(self,altitudes):
-        linelist=[]
+        linelist=[(MWIDTH,HUPHEIGHT)] #en bas à gauche
         playeralt=self.joueur.z
         x=MWIDTH
         deltax=HUPWIDTH/self.distance
         for alt in altitudes:
             x+=deltax
+            #A revoir
             y=HUPHEIGHT-(HUPHEIGHT-25*HUPHEIGHT/100)*alt/playeralt
             linelist.append((x,y))
+        linelist.append((WIDTH,HUPHEIGHT)) #enbas à droite
         return linelist
 
 
@@ -57,4 +59,5 @@ class HubUp():
         pg.draw.line(self.screen, (128, 0, 128), self.debut, self.fin,5)
         # LE parapente
         self.screen.blit(self.image, (MWIDTH+(1-self.percent)*HUPWIDTH, 0))
-        pg.draw.lines(self.screen,(255,255,255),False, self.linelist)
+        couleur_terre=(153,76,0)
+        pg.draw.polygon(self.screen,couleur_terre, self.linelist)

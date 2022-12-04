@@ -24,7 +24,8 @@ def gauss2D(N):
 
 
 class Carte():
-    def __init__(self):
+    def __init__(self,screen):
+        self.screen = screen
         #taille 9x16
         # 0,1,2,3 pour les hauteurs()
         self.mapdef = ['3100011122211100',
@@ -68,12 +69,28 @@ class Carte():
 
         self.create_colormap()
 
+        #Pour affichage dans pygame
+        self.bg = pg.image.load(self.colormapfile)
+        self.bg = pg.transform.smoothscale(self.bg, (MWIDTH, MHEIGHT))
+
         #TODO: Clarifier
         #TILE_SIZE c'est la taille d'une tuile de minimap, pas trop utile en fait en dehors de carte
         #self.scale est l'échelle de self.map autrement dit entre i et i+1 il y a une distance scale en m
         #Ca doit avoir un rapport avec SCALE mais à clarifier
         self.scale = 2 # en m
         
+    def add_thermique(self,thermiques_list):
+        """
+        les thermiques présents
+        """
+        self.thermiques=thermiques_list
+    
+    def add_vent(self,vent):
+        """
+        On verra
+        """
+        pass
+    
 
     def make_minimap(self):
         self.minimap = [[int(num) for num in line]
@@ -163,6 +180,17 @@ class Carte():
             return 4000
         else:
             return self.map[i,j]
+
+    def draw(self):
+        self.screen.blit(self.bg, (0, 0))
+        if len(self.thermiques) > 0:
+            for thermique in self.thermiques:
+                thermique.draw()   
+
+    def update(self):
+        if len(self.thermiques) > 0:
+            for thermique in self.thermiques:
+                thermique.update()   
 
     def plot3D(self):
         height, width = self.map.shape

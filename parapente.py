@@ -1,7 +1,7 @@
-from matplotlib.pyplot import margins
-from regex import P
-from settings import *
 
+from settings import *
+from carte import Carte
+from thermique import Thermique
 
 class Frein():
     def __init__(self):
@@ -19,9 +19,10 @@ class Frein():
 
 
 class Parapente(pg.sprite.Sprite):
-    def __init__(self, screen):
+    def __init__(self, screen, carte : Carte):
         super().__init__()
         self.screen = screen
+        self.carte=carte
 
         #Caractéristiques physiques
         self.vmin = 6  # en m s^-1 vitesse décrochage
@@ -67,6 +68,19 @@ class Parapente(pg.sprite.Sprite):
         rapport = (self.v+deltav) / self.v
         self.vecv = self.vecv*rapport
         self.v = self.vecv.length()
+    
+    def calculate_vzthermique(self):
+        thermiques : list(Thermique) =self.carte.thermiques
+        if len(thermiques)>0 :
+            for thermique in thermiques:
+                d_fromcenter=(self.OM-thermique.OM).length()
+                if d_fromcenter < thermique.radius:
+                    self.vzthermique=thermique.get_vz(self.z)
+                    print(f'vzthermique={self.vzthermique}')
+                else:
+                    self.vzthermique = 0
+        else:
+            self.vzthermique = 0
 
     def update_v(self):
         pass
@@ -77,13 +91,15 @@ class Parapente(pg.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.OM)
         #Mise à jour altitude:
         self.z += self.vz
+        #Check thermique
+        self.calculate_vzthermique()
         #Mise à jour vitesse
         self.update_v()
 
 
 class Joueur(Parapente):
-    def __init__(self, screen):
-        super().__init__(screen)
+    def __init__(self, screen , carte : Carte):
+        super().__init__(screen,carte)
         self.frein_gauche = Frein()
         self.frein_droit = Frein()
 
@@ -156,4 +172,5 @@ class Joueur(Parapente):
         #DAns un premier temps sans inertie
         #maisn En tenant compte du virage
         vzvirage=-12*(self.w/self.wmax)**2 #-12 ms^-1 en virage au taquet
-        self.vz = vzmains+vzvirage
+
+        self.vz = vzmains+vzvirage+self.vzthermique
