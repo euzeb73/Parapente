@@ -24,7 +24,7 @@ HAUTEURS=[100,500,1000,2000]
 #Echelle horizontale en mpp (meter per pixel)
 SCALE=0.5 #PAS ENCORE UTILISE TODO
 
-#Vitesse du jeu
+#Vitesse du jeu par défaut
 VITESSE_MULT=5
 DT=VITESSE_MULT/FPS
 

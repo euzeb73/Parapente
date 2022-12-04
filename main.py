@@ -32,6 +32,7 @@ class App:
         self.clock = pg.time.Clock()
         self.time = 0
         self.delta_time = 0.01
+        self.vitesse_mult=VITESSE_MULT #TODO changer pour avoir aussi DT à passer à parapente et thermique
 
         #Création de la carte
         t1 = time.time()
@@ -64,7 +65,7 @@ class App:
         """a compléter"""
         thermique=Thermique(self.screen, self.carte)
         thermique.set_param(150,5,3500)
-        thermique.move_to(250,250)
+        thermique.move_to(900,500)
         self.carte.add_thermique([thermique])
 
     def update(self):
@@ -86,9 +87,11 @@ class App:
         #Infos
         self.fontsmall.addtext(f'vz {self.parapente.vz}','vz')
         self.fontsmall.addtext(f'z {self.parapente.z}','z')
+        self.fontsmall.addtext(f'Vitesse x{self.vitesse_mult}','v')
         
         self.screen.blit(self.fontsmall.textdic['vz'], (100,100))
         self.screen.blit(self.fontsmall.textdic['z'], (100,130))
+        self.screen.blit(self.fontsmall.textdic['v'], (100,50))
 
         #Hubs
         self.hubdown.draw()
@@ -131,6 +134,11 @@ class App:
                     self.freing = DESCEND
                 if e.key == pg.K_m:
                     self.freind = DESCEND
+                if e.key == pg.K_PLUS:
+                    self.vitesse_mult+=1
+                if e.key == pg.K_MINUS:
+                    self.vitesse_mult-=1
+                self.vitesse_mult = max(min(self.vitesse_mult,64),0) #max 64 min 0
         if self.freind == MONTE:
             self.parapente.frein_droit.monte()
         elif self.freind == DESCEND:

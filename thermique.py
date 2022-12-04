@@ -31,7 +31,10 @@ class Thermique():
     def get_vz(self, z):
         
         """
+        TODO
         Ajouter une dépendance radiale
+
+        Corriger la dépendance avec l'altitude (ça depasse vsmax)
         """
 
         hauteur = self.zmax-self.zmin
@@ -39,11 +42,9 @@ class Thermique():
             return 0
         elif z > self.premiere_partie * hauteur + self.zmin and z <= self.zmax-self.derniere_partie * hauteur:
             # monte de plus en plus
-            print('ici')
             return (self.vzmax-self.vzmin)*(z-self.zmin)/(self.premiere_partie * hauteur)
         elif z > self.zmax-self.derniere_partie * hauteur:
             # monte de moins en moins
-            print('là')
             return (-self.vzmax)*(z-self.zmax)/(self.derniere_partie * hauteur)
 
     def update(self):

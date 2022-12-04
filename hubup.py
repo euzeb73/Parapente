@@ -56,7 +56,7 @@ class HubUp():
 
     def draw(self):
         pg.Surface.fill(self.screen, (255, 0, 0), rect=self.hub)
-        pg.draw.line(self.screen, (128, 0, 128), self.debut, self.fin,5)
+        # pg.draw.line(self.screen, (128, 0, 128), self.debut, self.fin,5) #pour visualiser
         # LE parapente
         self.screen.blit(self.image, (MWIDTH+(1-self.percent)*HUPWIDTH, 0))
         couleur_terre=(153,76,0)

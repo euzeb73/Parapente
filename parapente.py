@@ -76,7 +76,6 @@ class Parapente(pg.sprite.Sprite):
                 d_fromcenter=(self.OM-thermique.OM).length()
                 if d_fromcenter < thermique.radius:
                     self.vzthermique=thermique.get_vz(self.z)
-                    print(f'vzthermique={self.vzthermique}')
                 else:
                     self.vzthermique = 0
         else:
