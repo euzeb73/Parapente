@@ -89,7 +89,7 @@ class Carte():
         """
         On verra
         """
-        pass
+        self.vent=vent
     
 
     def make_minimap(self):

@@ -1,6 +1,7 @@
 
 from settings import *
 from carte import Carte
+from vent import Vent
 
 
 class Thermique():
@@ -28,27 +29,39 @@ class Thermique():
         self.vzmax = vzmax
         self.zmax = zmax
 
-    def get_vz(self, z):
-        
+    def get_vz(self, pos2D: vec2, z):
         """
-        TODO
-        Ajouter une dépendance radiale
-
-        Corriger la dépendance avec l'altitude (ça depasse vsmax)
+        Dépendance avec l'altitude linéaire par morceaux
+        Dépendance radiale quadratique
         """
-
+        vz = 0
         hauteur = self.zmax-self.zmin
         if z < self.zmin or z > self.zmax:
-            return 0
-        elif z > self.premiere_partie * hauteur + self.zmin and z <= self.zmax-self.derniere_partie * hauteur:
+            vz = 0
+        elif z > self.zmin and z < self.premiere_partie * hauteur + self.zmin:
             # monte de plus en plus
-            return (self.vzmax-self.vzmin)*(z-self.zmin)/(self.premiere_partie * hauteur)
+            vz = (self.vzmax-self.vzmin)*(z-self.zmin) / \
+                (self.premiere_partie * hauteur)
+        elif z > self.premiere_partie * hauteur + self.zmin and z < self.zmax-self.derniere_partie * hauteur:
+            # Partie "milieu en hauteur" du thermique vz =cste= vzmax
+            vz = self.vzmax
         elif z > self.zmax-self.derniere_partie * hauteur:
             # monte de moins en moins
-            return (-self.vzmax)*(z-self.zmax)/(self.derniere_partie * hauteur)
+            vz = (-self.vzmax)*(z-self.zmax)/(self.derniere_partie * hauteur)
+
+        # Distance au centre
+        d = (self.OM-pos2D)
+        if d <= self.radius:  # dans le thermique
+            vz = - vz(d**2-self.radius**2)/self.radius**2
+        else: # hors thermique
+            vz = 0
+        return vz
 
     def update(self):
-        pass
+        vent : Vent =self.carte.vent
+        # Le thermique dérive à la vitesse du vent à son altitude mini
+        vderive = vent.get_vwind(self.OM,self.zmin)
+        self.OM += vderive*DT
 
     def draw(self):
         pg.draw.circle(self.screen, (200, 200, 200, 0), self.OM, self.radius)

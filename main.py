@@ -4,11 +4,12 @@ from carte import Carte
 from hubup import HubUp
 from hubdown import HubDown
 from parapente import Joueur, Parapente
+from vent import Vent
+from thermique import Thermique
 import sys
 import time
 import numpy as np
 import matplotlib.pyplot as plt
-from thermique import Thermique
 
 
 class Font():
@@ -46,6 +47,9 @@ class App:
 
         #thermiques
         self.generate_thermals()
+
+        #vent
+        self.carte.add_vent(Vent(self.carte))
 
         #HUBs
         self.hubup = HubUp(self.screen, self.parapente, self.carte)

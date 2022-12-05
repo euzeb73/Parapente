@@ -20,7 +20,7 @@ def ray_casting(ecran,scale,OMplayer,zplayer,vecv,longueur,colormap,map):
     rot = np.array([[cos(demi_angle), -sin(demi_angle)], [sin(demi_angle), cos(demi_angle)]])
     direction=np.dot(rot,direction) # valeur de départ 
     for ray_num in range(N):
-        for distance in range(1, longueur):
+        for distance in range(1, longueur,5): #step élevé ça va plus vite mais moins de détails.
             x, y = OMplayer + direction * distance
             Nn, M = map.shape
             #il y aura du SCALE là de dans plus tard.
@@ -71,7 +71,7 @@ class HubDown():
                 self.colormap[i,j]=np.array([self.colormap[i,j,0],self.colormap[i,j,1],self.colormap[i,j,2]])
 
     def draw(self):
-        longueur=800
+        longueur=1500
         N = HDWIDTH  # nb de rayons
         screen_array = np.full((N, HDHEIGHT, 3), np.array([200, 200, 255]))
         ecran = ray_casting(screen_array,self.joueur.carte.scale,np.array(self.joueur.OM),np.array(self.joueur.z),np.array(self.joueur.vecv),longueur,self.colormap,self.joueur.carte.map)

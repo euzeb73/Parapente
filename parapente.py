@@ -1,6 +1,7 @@
 
 from settings import *
 from carte import Carte
+from vent import Vent
 from thermique import Thermique
 
 class Frein():
@@ -70,7 +71,7 @@ class Parapente(pg.sprite.Sprite):
         self.v = self.vecv.length()
     
     def calculate_vzthermique(self):
-        thermiques : list(Thermique) =self.carte.thermiques
+        thermiques : list(Thermique) = self.carte.thermiques
         if len(thermiques)>0 :
             for thermique in thermiques:
                 d_fromcenter=(self.OM-thermique.OM).length()
@@ -85,6 +86,8 @@ class Parapente(pg.sprite.Sprite):
         pass
 
     def update(self):
+        vent : Vent = self.carte.vent
+        self.vecvvent = vent.get_vwind(self.OM,self.z)
         #mise à jour position
         self.OM = self.OM+DT*(self.vecv+self.vecvvent)    
         self.rect = self.image.get_rect(center=self.OM)
