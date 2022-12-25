@@ -168,6 +168,22 @@ class Carte():
 
         plt.imsave(self.colormapfile, self.map, cmap='terrain')
 
+    def ij_to_xy(self,i,j):
+        """pour passer des i,j sur self.map au x,y dans la réalité"""
+        x,y= self.scale * j , self.scale *i
+        return x,y
+    
+    def xy_to_ij(self,x,y):
+        """pour passer des x,y de la réalité aux i,j sur self.map"""
+        j,i=int(round(x/self.scale)),int(round(y/self.scale))
+        return i,j
+
+    def is_dedans(self,i,j):
+        """renvoie true si i,j est dans les indices de map"""
+        N, M = self.map.shape
+        dedans = i>0 and i<N and j>0 and j<M
+        return dedans
+
     def read_alt(self, x, y):
         """
         Renvoie l'altitude du point x,y si x,y n'est pas dans la map renvoie 4000 m
@@ -190,7 +206,7 @@ class Carte():
     def update(self):
         if len(self.thermiques) > 0:
             for thermique in self.thermiques:
-                thermique.update()   
+                thermique.update()
 
     def plot3D(self):
         height, width = self.map.shape

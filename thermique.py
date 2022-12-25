@@ -50,9 +50,9 @@ class Thermique():
             vz = (-self.vzmax)*(z-self.zmax)/(self.derniere_partie * hauteur)
 
         # Distance au centre
-        d = (self.OM-pos2D)
+        d = (self.OM-pos2D).length()
         if d <= self.radius:  # dans le thermique
-            vz = - vz(d**2-self.radius**2)/self.radius**2
+            vz = vz*(1-d/self.radius)**0.4
         else: # hors thermique
             vz = 0
         return vz
@@ -62,6 +62,7 @@ class Thermique():
         # Le thermique dérive à la vitesse du vent à son altitude mini
         vderive = vent.get_vwind(self.OM,self.zmin)
         self.OM += vderive*DT
+        # self.move_to(*self.OM) #quand ce sera mieux fait.
 
     def draw(self):
-        pg.draw.circle(self.screen, (200, 200, 200, 0), self.OM, self.radius)
+        pg.draw.circle(self.screen, (200, 200, 200), self.OM/self.carte.scale, self.radius/self.carte.scale,width = 1)

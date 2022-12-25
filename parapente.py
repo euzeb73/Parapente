@@ -76,7 +76,7 @@ class Parapente(pg.sprite.Sprite):
             for thermique in thermiques:
                 d_fromcenter=(self.OM-thermique.OM).length()
                 if d_fromcenter < thermique.radius:
-                    self.vzthermique=thermique.get_vz(self.z)
+                    self.vzthermique=thermique.get_vz(self.OM,self.z)
                 else:
                     self.vzthermique = 0
         else:
@@ -89,8 +89,9 @@ class Parapente(pg.sprite.Sprite):
         vent : Vent = self.carte.vent
         self.vecvvent = vent.get_vwind(self.OM,self.z)
         #mise à jour position
-        self.OM = self.OM+DT*(self.vecv+self.vecvvent)    
-        self.rect = self.image.get_rect(center=self.OM)
+        self.OM = self.OM+DT*(self.vecv+self.vecvvent)
+        #position a convertir en pixels    
+        self.rect = self.image.get_rect(center=self.OM)#/self.carte.scale)
         #Mise à jour altitude:
         self.z += self.vz
         #Check thermique

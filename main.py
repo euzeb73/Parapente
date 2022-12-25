@@ -4,7 +4,7 @@ from carte import Carte
 from hubup import HubUp
 from hubdown import HubDown
 from parapente import Joueur, Parapente
-from vent import Vent
+from vent import Vent, Vent0
 from thermique import Thermique
 import sys
 import time
@@ -25,6 +25,7 @@ class Font():
         else:
             self.textdic[txtname] = self.font.render(text, True, color)
 
+
 class App:
     def __init__(self):
 
@@ -33,7 +34,8 @@ class App:
         self.clock = pg.time.Clock()
         self.time = 0
         self.delta_time = 0.01
-        self.vitesse_mult=VITESSE_MULT #TODO changer pour avoir aussi DT à passer à parapente et thermique
+        # TODO changer pour avoir aussi DT à passer à parapente et thermique
+        self.vitesse_mult = VITESSE_MULT
 
         #Création de la carte
         t1 = time.time()
@@ -49,7 +51,7 @@ class App:
         self.generate_thermals()
 
         #vent
-        self.carte.add_vent(Vent(self.carte))
+        self.carte.add_vent(Vent0(self.carte))
 
         #HUBs
         self.hubup = HubUp(self.screen, self.parapente, self.carte)
@@ -67,9 +69,9 @@ class App:
 
     def generate_thermals(self):
         """a compléter"""
-        thermique=Thermique(self.screen, self.carte)
-        thermique.set_param(150,5,3500)
-        thermique.move_to(900,500)
+        thermique = Thermique(self.screen, self.carte)
+        thermique.set_param(150, 5, 3500)
+        thermique.move_to(150, 50)
         self.carte.add_thermique([thermique])
 
     def update(self):
@@ -82,32 +84,33 @@ class App:
 
         self.hubup.update()
 
+        self.hubdown.update()
+
         self.spritegroup.update()
 
     def draw(self):
         #Background
-        self.carte.draw() #background
+        self.carte.draw()  # background
 
         #Infos
-        self.fontsmall.addtext(f'vz {self.parapente.vz}','vz')
-        self.fontsmall.addtext(f'z {self.parapente.z}','z')
-        self.fontsmall.addtext(f'Vitesse x{self.vitesse_mult}','v')
-        
-        self.screen.blit(self.fontsmall.textdic['vz'], (100,100))
-        self.screen.blit(self.fontsmall.textdic['z'], (100,130))
-        self.screen.blit(self.fontsmall.textdic['v'], (100,50))
+        self.fontsmall.addtext(f'vz {self.parapente.vz}', 'vz')
+        self.fontsmall.addtext(f'z {self.parapente.z}', 'z')
+        self.fontsmall.addtext(f'Vitesse x{self.vitesse_mult}', 'v')
+
+        self.screen.blit(self.fontsmall.textdic['vz'], (100, 100))
+        self.screen.blit(self.fontsmall.textdic['z'], (100, 130))
+        self.screen.blit(self.fontsmall.textdic['v'], (100, 50))
 
         #Hubs
         self.hubdown.draw()
         self.hubup.draw()
-        
-        #Thermiques
 
+        #Thermiques
+        # for thermique in self.carte.thermiques:
+        #     thermique.draw()
 
         #Sprites
         self.spritegroup.draw(self.screen)
-
-        
 
         # pg.draw.rect(self.screen,(255,0,0),self.parapente.rect)
         # self.main_group.draw(self.screen)
@@ -139,10 +142,11 @@ class App:
                 if e.key == pg.K_m:
                     self.freind = DESCEND
                 if e.key == pg.K_PLUS:
-                    self.vitesse_mult+=1
+                    self.vitesse_mult += 1
                 if e.key == pg.K_MINUS:
-                    self.vitesse_mult-=1
-                self.vitesse_mult = max(min(self.vitesse_mult,64),0) #max 64 min 0
+                    self.vitesse_mult -= 1
+                self.vitesse_mult = max(
+                    min(self.vitesse_mult, 64), 0)  # max 64 min 0
         if self.freind == MONTE:
             self.parapente.frein_droit.monte()
         elif self.freind == DESCEND:
